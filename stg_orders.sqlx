@@ -1,0 +1,25 @@
+config {
+  type: "table",
+  schema: "staging",
+  assertions: {
+    uniqueKey: ["order_id"],
+    nonNull: ["order_id", "customer_id", "product_id"],
+    rowConditions: [
+      "unit_price_usd >= 0",
+      "quantity >= 1",
+      "status IN ('completed', 'refunded', 'pending')"
+    ]
+  }
+}
+
+SELECT
+  CAST(order_id AS INT64)         AS order_id,
+  CAST(customer_id AS INT64)      AS customer_id,
+  CAST(product_id AS INT64)       AS product_id,
+  CAST(quantity AS INT64)         AS quantity,
+  CAST(unit_price_usd AS FLOAT64) AS unit_price_usd,
+  CAST(quantity AS INT64) * CAST(unit_price_usd AS FLOAT64) AS gross_revenue_usd,
+  LOWER(status)                   AS status,
+  DATE(ordered_at)                AS order_date
+FROM ${ref("raw_orders")}
+WHERE order_id IS NOT NULL

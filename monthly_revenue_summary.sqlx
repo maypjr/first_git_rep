@@ -1,0 +1,24 @@
+config {
+  type: "table",
+  schema: "marts",
+  description: "Month-over-month revenue by product category and country"
+}
+
+SELECT
+  order_month,
+  product_category,
+  country,
+  COUNT(DISTINCT customer_id)  AS unique_customers,
+  COUNT(order_id)              AS total_orders,
+  ROUND(SUM(net_revenue_usd), 2) AS net_revenue_usd,
+  ROUND(AVG(net_revenue_usd), 2) AS avg_order_value_usd,
+  ROUND(
+    SUM(net_revenue_usd)
+    - LAG(SUM(net_revenue_usd)) OVER (
+        PARTITION BY product_category, country
+        ORDER BY order_month
+      ),
+    2
+  ) AS revenue_vs_prev_month_usd
+FROM ${ref("fct_orders")}
+GROUP BY 1,2,3

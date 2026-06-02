@@ -1,0 +1,9 @@
+tables:
+  - name: raw_customers
+    dataset: raw
+  - name: raw_orders
+    dataset: raw
+  - name: raw_products
+    dataset: raw
+  - name: raw_sessions
+    dataset: raw

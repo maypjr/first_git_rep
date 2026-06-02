@@ -1,0 +1,27 @@
+config {
+  type: "table",
+  schema: "marts",
+  description: "Final orders fact table",
+  partitionBy: "order_date",
+  clusterBy: ["country", "product_category"]
+}
+
+SELECT
+  order_id,
+  order_date,
+  DATE_TRUNC(order_date, MONTH) AS order_month,
+  customer_id,
+  customer_name,
+  country,
+  product_id,
+  product_name,
+  product_category,
+  quantity,
+  unit_price_usd,
+  gross_revenue_usd,
+  CASE
+    WHEN status = 'refunded' THEN -gross_revenue_usd
+    ELSE gross_revenue_usd
+  END AS net_revenue_usd
+FROM ${ref("int_orders_enriched")}
+WHERE status IN ('completed', 'refunded')
